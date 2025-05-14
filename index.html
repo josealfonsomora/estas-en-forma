@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calculadora de Forma Física</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      max-width: 800px;
+      margin: auto;
+      padding: 2rem;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    label, select, input {
+      display: block;
+      margin: 1rem 0;
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    .result {
+      margin: 2rem 0;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .exercise {
+      margin-top: 1.5rem;
+    }
+    .exercise img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    .exercise h3 {
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Calculadora de Forma Física</h1>
+  <p>Introduce tus datos para ver los objetivos físicos estimados.</p>
+
+  <label>Peso (kg):</label>
+  <input type="number" id="peso" value="74"/>
+
+  <label>Edad:</label>
+  <input type="number" id="edad" value="40"/>
+
+  <label>Género:</label>
+  <select id="genero">
+    <option value="hombre">Hombre</option>
+    <option value="mujer">Mujer</option>
+  </select>
+
+  <button onclick="calcular()">Calcular</button>
+
+  <div id="resultados" class="result"></div>
+
+  <script>
+    const ejercicios = {
+      hombre: {
+        sentadilla: 1.5,
+        pesoMuerto: 1.8,
+        pressBanca: 1.0,
+        pressMilitar: 0.75,
+        dominadas: 6,
+        colgado: 60,
+        caminarPeso: 60,
+        carrera5k: 25,
+        sprint100m: 15,
+        salto: 'cadera'
+      },
+      mujer: {
+        sentadilla: 0.9,
+        pesoMuerto: 1.2,
+        pressBanca: 0.5,
+        pressMilitar: 0.35,
+        dominadas: 2,
+        colgado: 60,
+        caminarPeso: 60,
+        carrera5k: 30,
+        sprint100m: 18,
+        salto: 'muslo'
+      }
+    };
+
+    function calcular() {
+      const peso = parseFloat(document.getElementById('peso').value);
+      const edad = parseInt(document.getElementById('edad').value);
+      const genero = document.getElementById('genero').value;
+
+      const e = ejercicios[genero];
+
+      let decadas = Math.floor((edad - 30) / 10);
+      decadas = Math.max(0, decadas);
+      const factorEdad = 1 - 0.10 * decadas;
+
+      const resultados = `
+        <h2>Resultados</h2>
+
+        <div class="exercise">
+          <h3>Sentadilla (1RM): ${Math.round(e.sentadilla * peso * factorEdad)} kg</h3>
+          <img src="https://cdn.pixabay.com/photo/2021/11/25/16/21/squat-6822299_960_720.jpg" alt="Sentadilla"/>
+        </div>
+
+        <div class="exercise">
+          <h3>Peso Muerto (1RM): ${Math.round(e.pesoMuerto * peso * factorEdad)} kg</h3>
+          <img src="https://cdn.pixabay.com/photo/2017/08/02/16/50/deadlift-2577766_960_720.jpg" alt="Peso Muerto"/>
+        </div>
+
+        <div class="exercise">
+          <h3>Press de Banca (1RM): ${Math.round(e.pressBanca * peso * factorEdad)} kg</h3>
+          <img src="https://cdn.pixabay.com/photo/2016/11/19/18/06/gym-1849088_960_720.jpg" alt="Press de banca"/>
+        </div>
+
+        <div class="exercise">
+          <h3>Press Militar (1RM): ${Math.round(e.pressMilitar * peso * factorEdad)} kg</h3>
+          <img src="https://cdn.pixabay.com/photo/2020/02/09/17/36/bodybuilding-4833614_960_720.jpg" alt="Press militar"/>
+        </div>
+
+        <div class="exercise">
+          <h3>Dominadas: ${Math.round(e.dominadas * factorEdad)} repeticiones</h3>
+          <img src="https://cdn.pixabay.com/photo/2016/11/29/03/53/people-1867762_960_720.jpg" alt="Dominadas"/>
+        </div>
+
+        <div class="exercise">
+          <h3>Aguantar colgado: ${Math.round(e.colgado * factorEdad)} segundos</h3>
+          <img src="https://cdn.pixabay.com/photo/2020/05/30/06/45/fitness-5238551_960_720.jpg" alt="Aguantar colgado"/>
+        </div>
+
+        <div class="exercise">
+          <h3>Caminar con tu peso: ${Math.round(e.caminarPeso * factorEdad)} segundos</h3>
+          <img src="https://cdn.pixabay.com/photo/2018/01/15/07/51/weightlifting-3087795_960_720.jpg" alt="Farmer's Walk"/>
+        </div>
+
+        <div class="exercise">
+          <h3>Carrera 5K: ${Math.round(e.carrera5k / factorEdad)} minutos</h3>
+          <img src="https://cdn.pixabay.com/photo/2015/06/22/08/39/running-817277_960_720.jpg" alt="5K running"/>
+        </div>
+
+        <div class="exercise">
+          <h3>100m lisos: ${Math.round(e.sprint100m / factorEdad)} segundos</h3>
+          <img src="https://cdn.pixabay.com/photo/2016/03/27/19/52/sprint-1283322_960_720.jpg" alt="Sprint"/>
+        </div>
+
+        <div class="exercise">
+          <h3>Salto vertical: hasta la altura de ${e.salto === 'cadera' ? 'tu cadera' : 'la mitad del muslo'} (${Math.round(100 * factorEdad)}% objetivo)</h3>
+          <img src="https://cdn.pixabay.com/photo/2016/03/27/21/59/jump-1284300_960_720.jpg" alt="Salto vertical"/>
+        </div>
+      `;
+
+      document.getElementById('resultados').innerHTML = resultados;
+    }
+  </script>
+</body>
+</html>
+
