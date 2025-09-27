@@ -1,194 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Calculadora de Forma Física</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f9f9f9;
-      color: #333;
-      max-width: 800px;
-      margin: auto;
-      padding: 2rem;
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    label, select, input {
-      display: block;
-      margin: 1rem 0;
-      width: 100%;
-      padding: 0.5rem;
-      font-size: 1rem;
-    }
-    button {
-      padding: 0.7rem;
-      font-size: 1rem;
-      width: 100%;
-      margin-top: 1rem;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    .result {
-      margin: 2rem 0;
-      padding: 1rem;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    }
-    .exercise {
-      margin-top: 1.5rem;
-    }
-    .exercise img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-      margin-top: 0.5rem;
-    }
-    .exercise h3 {
-      margin-bottom: 0.5rem;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Timer Pistola Estándar</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+  #timer { font-size: 48px; margin-bottom: 20px; }
+  #phase { font-size: 24px; margin-bottom: 20px; }
+</style>
 </head>
 <body>
-  <h1>Calculadora de Forma Física</h1>
-  <p>Introduce tus datos para ver los objetivos físicos estimados.</p>
 
-  <label>Género:</label>
-  <select id="genero">
-    <option value="" disabled selected>Selecciona tu género</option>
-    <option value="hombre">Hombre</option>
-    <option value="mujer">Mujer</option>
-  </select>
+<div id="phase">Preparado para iniciar</div>
+<div id="timer">00:00</div>
+<button onclick="startTimer()">Iniciar</button>
 
-  <label>Peso (kg):</label>
-  <input type="number" id="peso" placeholder="Ej. 74" />
+<script>
+let rounds = [
+  {name: "Ronda 1: 150 segundos", duration: 150},
+  {name: "Descanso 1: 60 segundos", duration: 60},
+  {name: "Ronda 2: 20 segundos", duration: 20},
+  {name: "Descanso 2: 60 segundos", duration: 60},
+  {name: "Ronda 3: 10 segundos", duration: 10},
+];
+let currentPhase = 0;
+let timerInterval;
 
-  <label>Edad:</label>
-  <input type="number" id="edad" placeholder="Ej. 40" />
+function startTimer() {
+  if(timerInterval) return; // evitar múltiples inicios
+  nextPhase();
+}
 
-  <button onclick="calcular()">Calcular</button>
+function nextPhase() {
+  if (currentPhase >= rounds.length) {
+    document.getElementById("phase").textContent = "Entrenamiento completado";
+    document.getElementById("timer").textContent = "00:00";
+    timerInterval = null;
+    return;
+  }
+  let phase = rounds[currentPhase];
+  let timeLeft = phase.duration;
+  document.getElementById("phase").textContent = phase.name;
+  updateTimerDisplay(timeLeft);
 
-  <div id="resultados" class="result"></div>
-
-  <script>
-    const ejercicios = {
-      hombre: {
-        sentadilla: 1.5,
-        pesoMuerto: 1.8,
-        pressBanca: 1.0,
-        pressMilitar: 0.75,
-        dominadas: 6,
-        colgado: 60,
-        caminarPeso: 60,
-        carrera5k: 25,
-        sprint100m: 15,
-        salto: 'cadera'
-      },
-      mujer: {
-        sentadilla: 0.9,
-        pesoMuerto: 1.2,
-        pressBanca: 0.5,
-        pressMilitar: 0.35,
-        dominadas: 2,
-        colgado: 60,
-        caminarPeso: 60,
-        carrera5k: 30,
-        sprint100m: 18,
-        salto: 'muslo'
-      }
-    };
-
-    const imagenes = {
-      sentadilla: "https://upload.wikimedia.org/wikipedia/commons/0/0c/Squats.gif",
-      pesoMuerto: "https://upload.wikimedia.org/wikipedia/commons/7/76/Deadlift.gif",
-      pressBanca: "https://upload.wikimedia.org/wikipedia/commons/7/75/Bench-press.gif",
-      pressMilitar: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Shoulder-press-1arms.gif",
-      dominadas: "https://upload.wikimedia.org/wikipedia/commons/d/d2/Pullups.gif",
-      colgado: "https://upload.wikimedia.org/wikipedia/commons/d/d2/Pullups.gif",
-      caminar: "https://upload.wikimedia.org/wikipedia/commons/4/4f/Farmer%27s_walk.gif",
-      carrera5k: "https://upload.wikimedia.org/wikipedia/commons/b/be/Runningicon.gif",
-      sprint: "https://upload.wikimedia.org/wikipedia/commons/b/be/Runningicon.gif",
-      salto: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Vertical_jump.gif"
-    };
-
-    function calcular() {
-      const peso = parseFloat(document.getElementById('peso').value);
-      const edad = parseInt(document.getElementById('edad').value);
-      const genero = document.getElementById('genero').value;
-
-      if (!peso || !edad || !genero) {
-        alert("Por favor completa todos los campos.");
-        return;
-      }
-
-      const e = ejercicios[genero];
-
-      let decadas = Math.floor((edad - 30) / 10);
-      decadas = Math.max(0, decadas);
-      const factorEdad = 1 - 0.10 * decadas;
-
-      const resultados = `
-        <h2>Resultados</h2>
-
-        <div class="exercise">
-          <h3>Sentadilla (1RM): ${Math.round(e.sentadilla * peso * factorEdad)} kg</h3>
-          <img src="${imagenes.sentadilla}" alt="Sentadilla"/>
-        </div>
-
-        <div class="exercise">
-          <h3>Peso Muerto (1RM): ${Math.round(e.pesoMuerto * peso * factorEdad)} kg</h3>
-          <img src="${imagenes.pesoMuerto}" alt="Peso Muerto"/>
-        </div>
-
-        <div class="exercise">
-          <h3>Press de Banca (1RM): ${Math.round(e.pressBanca * peso * factorEdad)} kg</h3>
-          <img src="${imagenes.pressBanca}" alt="Press de banca"/>
-        </div>
-
-        <div class="exercise">
-          <h3>Press Militar (1RM): ${Math.round(e.pressMilitar * peso * factorEdad)} kg</h3>
-          <img src="${imagenes.pressMilitar}" alt="Press militar"/>
-        </div>
-
-        <div class="exercise">
-          <h3>Dominadas: ${Math.round(e.dominadas * factorEdad)} repeticiones</h3>
-          <img src="${imagenes.dominadas}" alt="Dominadas"/>
-        </div>
-
-        <div class="exercise">
-          <h3>Aguantar colgado: ${Math.round(e.colgado * factorEdad)} segundos</h3>
-          <img src="${imagenes.colgado}" alt="Aguantar colgado"/>
-        </div>
-
-        <div class="exercise">
-          <h3>Caminar con tu peso: ${Math.round(e.caminarPeso * factorEdad)} segundos</h3>
-          <img src="${imagenes.caminar}" alt="Caminar con peso"/>
-        </div>
-
-        <div class="exercise">
-          <h3>Carrera 5K: ${Math.round(e.carrera5k / factorEdad)} minutos</h3>
-          <img src="${imagenes.carrera5k}" alt="5K running"/>
-        </div>
-
-        <div class="exercise">
-          <h3>100m lisos: ${Math.round(e.sprint100m / factorEdad)} segundos</h3>
-          <img src="${imagenes.sprint}" alt="Sprint"/>
-        </div>
-
-        <div class="exercise">
-          <h3>Salto vertical: hasta la altura de ${e.salto === 'cadera' ? 'tu cadera' : 'la mitad del muslo'} (${Math.round(100 * factorEdad)}% objetivo)</h3>
-          <img src="${imagenes.salto}" alt="Salto vertical"/>
-        </div>
-      `;
-
-      document.getElementById('resultados').innerHTML = resultados;
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay(timeLeft);
+    if(timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      currentPhase++;
+      setTimeout(nextPhase, 1000);
     }
-  </script>
+  }, 1000);
+}
+
+function updateTimerDisplay(seconds) {
+  let min = Math.floor(seconds / 60);
+  let sec = seconds % 60;
+  document.getElementById("timer").textContent = 
+    (min < 10 ? "0" + min : min) + ":" + (sec < 10 ? "0" + sec : sec);
+}
+</script>
+
 </body>
 </html>
